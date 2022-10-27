@@ -1,0 +1,2 @@
+MATCH (p1:HighOrderReqItem {part: 'HighOrderReq'}) - [l:TRACE] -> (p2:LowOrderReqItem {part: 'LowOrderReq'}) - [l1:TRACE] -> (p3:CodeList {part: 'Code'}) -[l2:TRACE] -> (p4:Test  {part: 'Tests'})
+RETURN p1, p2, p3, p4, type(l)

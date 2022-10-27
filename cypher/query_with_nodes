@@ -1,0 +1,3 @@
+MATCH (p1:HighOrderReqItem) - [l:TRACE] -> (p2:LowOrderReqItem) - [l1:TRACE] -> (p3:CodeList) -[l2:TRACE] -> (p4:Test)
+WHERE (p1) - [:IN] -> (:HighOrderReq) AND (p2) - [:IN] -> (:LowOrderReq) AND (p3) - [:IN] -> (:Code) AND (p4) - [:IN] -> (:Tests)
+RETURN p1, p2, p3, p4, type(l)

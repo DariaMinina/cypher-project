@@ -1,0 +1,7 @@
+FOREACH (i in range(1, 50000) | MERGE (:HighOrderReqItem { name: "HORI-"+ i,part: "HighOrderReq" }))
+FOREACH (i in range(1, 50000) | MERGE (:LowOrderReqItem { name: "LORI-"+ i, part: "LowOrderReq" }))
+FOREACH (i in range(1, 50000) | MERGE (:CodeList { name: "CL-" + i, part: "Code" }))
+FOREACH (i in range(1, 50000) | MERGE (:Test { name: "T-" + i, part: "Tests" }))
+
+UNWIND range(1, 50000) AS i
+MERGE (:HighOrderReqItem { name: "HORI-"+ i,part: "HighOrderReq" })

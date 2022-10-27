@@ -1,0 +1,86 @@
+CREATE (HOR: HighOrderReq {version: 1})
+CREATE (LOR: LowOrderReq {version: 3})
+CREATE (code: Code {version: 1})
+CREATE (tests: Tests {version: 4})
+
+CREATE (HORI0:HighOrderReqItem {name: 'HighOrderReqItem0'})
+CREATE (HORI1:HighOrderReqItem {name: 'HighOrderReqItem1'})
+CREATE (HORI2:HighOrderReqItem {name: 'HighOrderReqItem2'})
+CREATE (HORI3:HighOrderReqItem {name: 'HighOrderReqItem3'})
+
+CREATE (LORI0:LowOrderReqItem {name: 'LowOrderReqItem0'})
+CREATE (LORI1:LowOrderReqItem {name: 'LowOrderReqItem1'})
+CREATE (LORI2:LowOrderReqItem {name: 'LowOrderReqItem2'})
+CREATE (LORI3:LowOrderReqItem {name: 'LowOrderReqItem3'})
+
+CREATE (CL0:CodeList {name: 'CodeList0'})
+CREATE (CL1:CodeList {name: 'CodeList1'})
+CREATE (CL2:CodeList {name: 'CodeList2'})
+CREATE (CL3:CodeList {name: 'CodeList3'})
+
+CREATE (T0:Test {name: 'T0'})
+CREATE (T1:Test {name: 'T1'})
+CREATE (T2:Test {name: 'T2'})
+CREATE (T3:Test {name: 'T3'})
+
+CREATE (HORI0)-[:IN]->(HOR)
+CREATE (HORI1)-[:IN]->(HOR)
+CREATE (HORI2)-[:IN]->(HOR)
+CREATE (HORI3)-[:IN]->(HOR)
+
+CREATE (LORI0)-[:IN]->(LOR)
+CREATE (LORI1)-[:IN]->(LOR)
+CREATE (LORI2)-[:IN]->(LOR)
+CREATE (LORI3)-[:IN]->(LOR)
+
+CREATE (CL0)-[:IN]->(code)
+CREATE (CL1)-[:IN]->(code)
+CREATE (CL2)-[:IN]->(code)
+CREATE (CL3)-[:IN]->(code)
+
+CREATE (T0)-[:IN]->(tests)
+CREATE (T1)-[:IN]->(tests)
+CREATE (T2)-[:IN]->(tests)
+CREATE (T3)-[:IN]->(tests)
+
+CREATE (HORI0)-[:TRACE]->(LORI0)
+CREATE (HORI0)-[:TRACE]->(LORI1)
+CREATE (HORI0)-[:TRACE]->(LORI2)
+
+CREATE (HORI1)-[:TRACE]->(LORI1)
+CREATE (HORI1)-[:TRACE]->(LORI2)
+CREATE (HORI1)-[:TRACE]->(LORI3)
+
+CREATE (HORI2)-[:TRACE]->(LORI0)
+CREATE (HORI2)-[:TRACE]->(LORI1)
+
+CREATE (HORI3)-[:TRACE]->(LORI2)
+CREATE (HORI3)-[:TRACE]->(LORI3)
+
+
+CREATE (LORI0)-[:TRACE]->(CL0)
+CREATE (LORI0)-[:TRACE]->(CL1)
+CREATE (LORI0)-[:TRACE]->(CL3)
+
+CREATE (LORI1)-[:TRACE]->(CL1)
+CREATE (LORI1)-[:TRACE]->(CL2)
+
+CREATE (LORI2)-[:TRACE]->(CL0)
+CREATE (LORI2)-[:TRACE]->(CL2)
+CREATE (LORI2)-[:TRACE]->(CL3)
+
+CREATE (LORI3)-[:TRACE]->(CL1)
+
+
+CREATE (CL0)-[:TRACE]->(T1)
+CREATE (CL0)-[:TRACE]->(T0)
+
+CREATE (CL1)-[:TRACE]->(T0)
+CREATE (CL1)-[:TRACE]->(T1)
+CREATE (CL1)-[:TRACE]->(T2)
+
+CREATE (CL2)-[:TRACE]->(T3)
+
+CREATE (CL3)-[:TRACE]->(T0)
+CREATE (CL3)-[:TRACE]->(T2)
+CREATE (CL3)-[:TRACE]->(T3)

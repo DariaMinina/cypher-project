@@ -1,0 +1,12 @@
+SELECT * from cypher('my_graph_name', $$
+CREATE (HORI4:HighOrderReqItem {name: 'HighOrderReqItem4', part: 'HighOrderReq'})
+CREATE (HORI4:HighOrderReqItem {name: 'HighOrderReqItem4', part: 'HighOrderReq'})
+CREATE (HORI9:HighOrderReqItem {name: 'HighOrderReqItem9', part: 'HighOrderReq'})
+CREATE (HORI2:HighOrderReqItem {name: 'HighOrderReqItem2', part: 'HighOrderReq'})
+CREATE (HORI4:HighOrderReqItem {name: 'HighOrderReqItem4', part: 'HighOrderReq'})
+CREATE (HORI3:HighOrderReqItem {name: 'HighOrderReqItem3', part: 'HighOrderReq'})
+CREATE (HORI7:HighOrderReqItem {name: 'HighOrderReqItem7', part: 'HighOrderReq'})
+CREATE (HORI7:HighOrderReqItem {name: 'HighOrderReqItem7', part: 'HighOrderReq'})
+CREATE (HORI5:HighOrderReqItem {name: 'HighOrderReqItem5', part: 'HighOrderReq'})
+CREATE (HORI0:HighOrderReqItem {name: 'HighOrderReqItem0', part: 'HighOrderReq'})
+$$) as (a agtype);
