@@ -135,7 +135,7 @@ class AgeBasicAccessor:
 
 
 if __name__ == "__main__":
-    age_test =  AgeBasicAccessor()
+    age_test = AgeBasicAccessor()
     age_test.setUp()
     # age_test.testExec()
     age_test.createGraph()
