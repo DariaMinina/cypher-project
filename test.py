@@ -1,5 +1,4 @@
 import age
-from age.models import Vertex
 
 DSN = "host=0.0.0.0 port=5432 dbname=tracer user=postgres password=mysecretpassword"
 HOST = "0.0.0.0"
@@ -12,111 +11,78 @@ GRAPH_NAME = "test_graph_name"
 
 class AgeBasicAccessor:
     ag = None
-    def setUp(self):
+
+    def set_up(self):
         print("Connecting to Test Graph.....")
         self.ag = age.connect(graph=GRAPH_NAME, host=HOST, port=PORT, dbname=DB, user=USER,
                               password=PASSWORD)
 
-    def tearDown(self):
+    def tear_down(self):
         # Clear test data
         print("Deleting Test Graph.....")
         age.deleteGraph(self.ag.connection, self.ag.graphName)
         self.ag.close()
 
-    def testExec(self):
-        ag = self.ag
-        # Create and Return single column
-        cursor = ag.execCypher("CREATE (n:Person {name: %s, title: 'Developer'}) RETURN n", params=('Andy',))
-        for row in cursor:
-            print(Vertex, type(row[0]))
-
-        # Create and Return multi columns
-        cursor = ag.execCypher("CREATE (n:Person {name: %s, title: %s}) RETURN id(n), n.name", cols=['id', 'name'],
-                               params=('Jack', 'Manager'))
-        row = cursor.fetchone()
-        print(row[0], row[1])
-        ag.commit()
-
-    def createGraph(self):
+    def create_graph(self, num_of_nodes, type_of_nodes, name_of_nodes, type_of_parts, name_of_parts, num_of_parts):
         ag = self.ag
 
         # Может выбрасываться age.exceptions.SqlExcutionError, надо как-то словить
         # если такого узла не существует
 
-        ag.execCypher("UNWIND range(1, 5) AS i MERGE (:HighOrderReqItem { name: \"HORI-\"+ i, marker: i}) ")
-        ag.execCypher("UNWIND range(1, 5) AS i MERGE (:LowOrderReqItem { name: \"LORI-\"+ i, marker: i}) ")
-        ag.execCypher("UNWIND range(1, 5) AS i MERGE (:CodeList { name: \"CL-\"+ i, marker: i}) ")
-        ag.execCypher("UNWIND range(1, 5) AS i MERGE (:Test { name: \"T-\"+ i, marker: i}) ")
-        ag.execCypher("CREATE (:HighOrderReq {name: \"HOR1\"}) CREATE (:LowOrderReq {name: \"LOR1\"}) CREATE (:Code {name: \"C1\"}) CREATE (:Tests {name: \"T1\"})")
-        ag.execCypher(
-            """ 
-            MATCH 
-	            (d1:HighOrderReq),
-	            (p1:HighOrderReqItem)
-            CREATE (p1) - [:IN] -> (d1)
-            """
-        )
-        ag.execCypher(
-            """ 
-            MATCH 
-                (d1:LowOrderReq),
-                (p1:LowOrderReqItem)
-            CREATE (p1) - [:IN] -> (d1)
-            """
-        )
-        ag.execCypher(
-            """ 
-            MATCH 
-                (d1:Code),
-                (p1:CodeList)
-            CREATE (p1) - [:IN] -> (d1)
-            """
-        )
-        ag.execCypher(
-            """ 
-            MATCH 
-                (d1:Tests),
-                (p1:Test)
-            CREATE (p1) - [:IN] -> (d1)
-            """
-        )
+        for i in range(num_of_parts):
+            ag.execCypher(
+                f'''
+                UNWIND range(1, {num_of_nodes}) AS i 
+                MERGE (:{str(type_of_nodes[i])} {{ name: \"{str(name_of_nodes[i])}-\"+ i, marker: i}}) 
+                '''
+            )
+            ag.execCypher(
+                f"CREATE (:{type_of_parts[i]} {{name: \"{str(name_of_parts[i])}\"}}) "
+            )
 
-        ag.execCypher(
-            """
-            UNWIND range (1,5) as loop
-            MATCH
-                (p1:HighOrderReqItem),
-                (p2:LowOrderReqItem)
-            WHERE p1.marker = loop AND (p2.marker = loop OR p2.marker = loop + 1)
-            CREATE (p1) - [:TRACE] -> (p2)
-            """
-        )
-
-        ag.execCypher(
-            """
-            UNWIND range (1,5) as loop
-            MATCH
-                (p1:LowOrderReqItem),
-                (p2:CodeList)
-            WHERE p1.marker = loop AND (p2.marker = loop OR p2.marker = loop + 1)
-            CREATE (p1) - [:TRACE] -> (p2)
-            """
-        )
-
-        ag.execCypher(
-            """
-            UNWIND range (1,5) as loop
-            MATCH
-                (p1:CodeList),
-                (p2:Test)
-            WHERE p1.marker = loop AND (p2.marker = loop OR p2.marker = loop + 1)
-            CREATE (p1) - [:TRACE] -> (p2)
-            """
-        )
+        for i in range(num_of_parts):
+            ag.execCypher(
+                f""" 
+                MATCH 
+                    (d1:{str(type_of_parts[i])}),
+                    (p1:{str(type_of_nodes[i])})
+                CREATE (p1) - [:IN] -> (d1)
+                """
+            )
 
         ag.commit()
 
-        cursor = ag.execCypher("MATCH p=(p1:HighOrderReqItem) - [l:TRACE] ->  (p2:LowOrderReqItem) - [:TRACE] -> (p3:CodeList) - [:TRACE] -> (p4:Test) RETURN p")
+    def create_relations(self, num_of_nodes, type_of_relation, type_of_parts, type_of_nodes):
+        ag = self.ag
+        for i in range(len(type_of_parts) - 1):
+            ag.execCypher(
+                f"""
+                UNWIND range (1,{num_of_nodes}) as loop
+                MATCH
+                    (p1:{str(type_of_nodes[i])}) - [:IN] -> (part1:{str(type_of_parts[i])}),
+                    (p2:{str(type_of_nodes[i+1])}) - [:IN] -> (part2:{str(type_of_parts[i+1])})
+                WHERE p1.marker = loop AND (p2.marker = loop OR p2.marker = loop + 1)
+                CREATE (p1) - [:{type_of_relation}] -> (p2)
+                """
+            )
+
+        ag.commit()
+
+    def select_chains(self, type_of_nodes, type_of_relation):
+        ag = self.ag
+        chain = ""
+        arrow = ""
+        for i in range(len(type_of_nodes)):
+            chain = f"{chain} {arrow} (:{type_of_nodes[i]})"
+            arrow = f"- [:{type_of_relation}] ->"
+        print(chain)
+
+        cursor = ag.execCypher(
+            f'''
+            MATCH p={chain}
+            RETURN p
+            '''
+        )
 
         count = 0
         for row in cursor:
@@ -132,13 +98,22 @@ class AgeBasicAccessor:
 
                 count += 1
                 indent += " >"
+            print(" ")
 
 
 if __name__ == "__main__":
-    age_test = AgeBasicAccessor()
-    age_test.setUp()
-    # age_test.testExec()
-    age_test.createGraph()
-    # age_test.tearDown()
+    num_of_nodes = 5  # количество узлов в одной доле графа
+    type_of_nodes = ["HighOrderReqItem", "LowOrderReqItem", "CodeList", "Test"]
+    name_of_nodes = ["HORI", "LORI", "CL", "T"]  # название узлов в каждой из долей
+    type_of_parts = ["HighOrderReq", "LowOrderReq", "Code", "Tests"]
+    name_of_parts = ["HOR1", "LOR1", "C1", "T1"]
+    num_of_parts = len(type_of_parts)
+    type_of_relation = "TRACE"
 
+    age_test = AgeBasicAccessor()
+    age_test.set_up()
+    age_test.create_graph(num_of_nodes, type_of_nodes, name_of_nodes, type_of_parts, name_of_parts, num_of_parts)
+    age_test.create_relations(num_of_nodes, type_of_relation, type_of_parts, type_of_nodes)
+    age_test.select_chains(type_of_nodes, type_of_relation)
+    age_test.tear_down()
 
